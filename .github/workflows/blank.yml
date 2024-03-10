@@ -115,7 +115,7 @@ jobs:
         run: |
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
           if [[ $device == "umi" || $device == "cas" || $device == "cmi" ]]; then
-          if [[ $NFC ]]; then
+          if [[ $NFC == true ]]; then
           sed -i 's/NFC_version=1/NFC_version=2/' build_local.sh
           fi
           fi
@@ -136,7 +136,7 @@ jobs:
           mkdir -p ~/.config/rclone/
           echo ${{ secrets.confbase64 }} > base64.txt
           base64 --decode base64.txt > ~/.config/rclone/rclone.conf
-          if [[ $NFC ]]; then
+          if [[ $NFC == true ]]; then
           rclone mkdir kr:/public-bucket/HyperOS 
           rclone copy -P ./zip/* kr:/public-bucket/HyperOS 
           else
