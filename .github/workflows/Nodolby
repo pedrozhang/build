@@ -1,0 +1,148 @@
+name: Xiaomi HyperOS no dolby
+on:
+  workflow_dispatch:
+    inputs:
+      build_matrix:
+        description: "构建阵列，以英文逗号分隔，预置all,865和870"
+        type: string
+        default: "865"
+        required: true
+      URL:
+        description: "待操作的系统包下载地址"
+        required: true
+        type: string
+      custom_version:
+        description: "待打包的版本号"
+        required: true
+        type: string
+      NFC:
+        description: "新版NFC"
+        required: true
+        type: boolean
+        default: true
+jobs:
+  build_matrix:
+    name: 设置构建阵列
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: 设置构建阵列
+        id: set-matrix
+        run: |
+          input_var="${{ github.event.inputs.build_matrix }}"
+          if [ "$input_var" = "865" ]; then
+            input_var="umi,cmi,cas,apollo"
+          elif [ "$input_var" = "870" ]; then
+            input_var="thyme,alioth"
+          elif [ "$input_var" = "all" ]; then
+            input_var="umi,cmi,cas,apollo,thyme,alioth"
+          fi
+          IFS=',' read -ra devices <<< "$input_var"
+          json_output="{\"list\":["
+          for device in "${devices[@]}"; do
+            json_output+="{\"device\":\"$device\"},"
+          done
+          json_output=${json_output%,}
+          json_output+="]}"
+          echo "matrix=$json_output" >> $GITHUB_OUTPUT
+  build:
+    name: 自动构建
+    runs-on: ubuntu-latest
+    needs: build_matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.build_matrix.outputs.matrix) }}
+    outputs:
+      NEW_PACKAGE_NAME: ${{ steps.auto-build.outputs.NEW_PACKAGE_NAME }}
+      MD5: ${{ steps.auto-build.outputs.MD5 }}
+    steps:
+      - name: 精简无用组件
+        run: |
+          docker rmi `docker images -q` || true
+          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/sudo apt/sources.list.d || true
+          sudo apt -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php* || true
+          sudo apt -y autoremove --purge || true
+          sudo apt -y autoclean || true
+          sudo apt clean || true
+      - name: 最大化并挂载构建空间
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 1024
+          swap-size-mb: 6144
+          remove-dotnet: "true"
+          temp-reserve-mb: 1024
+          remove-android: "true"
+          remove-haskell: "true"
+      - uses: actions/checkout@v4.1.1
+        with:
+          repository: Weverses/ActionBuildCasSystemT
+          token: ${{ secrets.GH_TOKEN }}
+      - name: 下载系统包
+        run: |
+          device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
+          sudo apt-get install python3 aria2 p7zip-full zstd unzip zipalign
+          sudo bash "$GITHUB_WORKSPACE"/tools/install_rclone.sh ${{ secrets.GH_TOKEN }}
+          mkdir -p ~/.config/rclone/
+          unzip -o -q -P 198783 "$GITHUB_WORKSPACE"/tools/rclone_config.zip -d ~/.config/rclone/
+          sudo apt-get install python3 aria2 p7zip-full zstd unzip zipalign
+          if [[ "$device" == "umi" ]]; then
+            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.4.0.TJBCNXM/miui_UMI_V14.0.4.0.TJBCNXM_23fc5ef4ee_13.0.zip
+          elif [[ "$device" == "cmi" ]]; then
+            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.4.0.TJACNXM/miui_CMI_V14.0.4.0.TJACNXM_dd66e9703f_13.0.zip
+          elif [[ "$device" == "cas" ]]; then
+            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.2.0.TJJCNXM/miui_CAS_V14.0.2.0.TJJCNXM_8064d8e1fb_13.0.zip
+          elif [[ "$device" == "apollo" ]]; then
+            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.5.0.SJDCNXM/miui_APOLLO_V14.0.5.0.SJDCNXM_e727f2446b_12.0.zip
+          elif [[ "$device" == "thyme" ]]; then
+            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.6.0.TGACNXM/miui_THYME_V14.0.6.0.TGACNXM_a3c1d41b17_13.0.zip
+          elif [[ "$device" == "alioth" ]]; then
+            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.8.0.TKHCNXM/miui_ALIOTH_V14.0.8.0.TKHCNXM_50141f32f2_13.0.zip
+          fi
+          ORIGIN_ZIP_NAME=$(echo $ORIGIN_URL | sed 's/.*\(miui_.*\.zip\).*/\1/')
+          ZIP_NAME_TARGET=$(echo $URL | sed 's/.*\(miui_.*\.zip\).*/\1/')
+          rclone copy OneDrive:/MI_Packages/RubbishBin/BottomPackages/"$ORIGIN_ZIP_NAME" "$GITHUB_WORKSPACE"
+          if [[ "$URL" == *PrePackages* ]]; then
+            rclone copy OneDrive:/MI_Packages/RubbishBin/PrePackages/"$ZIP_NAME_TARGET" "$GITHUB_WORKSPACE"
+          elif [[ "$URL" != "$ORIGIN_URL" ]]; then
+            aria2c -x16 -j$(nproc) -U "Mozilla/5.0" -d "$GITHUB_WORKSPACE" "$URL"
+          fi
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+          URL: ${{ inputs.URL }}
+      - name: 自动构建
+        id: auto-build
+        run: |
+          device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
+          if [[ $device == "umi" || $device == "cas" || $device == "cmi" ]]; then
+          if [[ $NFC == true ]]; then
+          sed -i 's/NFC_version=1/NFC_version=2/' build_local.sh
+          fi
+          fi
+          sed -i 's/status_bar_lyric=0/status_bar_lyric=1/' build_local.sh
+          sed -i 's/Dolby()/NoDolby()/' build_local.sh
+          bash build_local.sh $URL $device $custom_version premium true false erofs
+          source "$GITHUB_WORKSPACE"/PackageInfo.txt
+          echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_ENV"
+          echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "MD5=$MD5" >> "$GITHUB_ENV"
+          echo "MD5=$MD5" >> "$GITHUB_OUTPUT"
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+          URL: ${{ inputs.URL }}
+          custom_version: ${{ inputs.custom_version }}
+          NFC: ${{ inputs.NFC }}
+      - name: 8.上传到Oracle S3
+        run: |
+          mkdir -p ~/.config/rclone/
+          echo ${{ secrets.confbase64 }} > base64.txt
+          base64 --decode base64.txt > ~/.config/rclone/rclone.conf
+          if [[ $NFC == true ]]; then
+          rclone mkdir kr:/public-bucket/HyperOS 
+          rclone copy -P ./zip/* kr:/public-bucket/HyperOS 
+          else
+          rclone mkdir jp:/jp/HyperOS 
+          rclone copy -P ./zip/* jp:/jp/HyperOS 
+          fi
+        env:
+          NFC: ${{ inputs.NFC }}
