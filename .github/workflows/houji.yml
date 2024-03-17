@@ -1,0 +1,43 @@
+name: Build ROM for Houji
+on:
+  workflow_dispatch:
+    inputs:
+      URL:
+        description: "移植包下载地址"
+        required: true
+        default: 'https://cdn-ota.azureedge.net/OS1.0.6.0.UNACNXM/miui_AURORA_OS1.0.6.0.UNACNXM_e078a99e28_14.0.zip'
+      VENDOR_URL:
+        description: "底包下载地址"
+        required: true
+        default: 'https://cdn-ota.azureedge.net/OS1.0.32.0.UNCCNXM/miui_HOUJI_OS1.0.32.0.UNCCNXM_4fd0e15877_14.0.zip'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 最大化构建环境
+        uses: easimon/maximize-build-space@master
+        with:
+          swap-size-mb: 8192
+          root-reserve-mb: 4096
+          temp-reserve-mb: 4096
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+      - name: 检出仓库文件
+        uses: YuKongA/Action_Build_Houji_ROM@main
+      - name: 准备所需环境
+        run: |
+          sudo timedatectl set-timezone Asia/Shanghai
+          sudo apt-get install python3 aria2 zstd
+          sudo -v ; curl https://rclone.org/install.sh | sudo bash
+      - name: 构建 ROM
+        run: |
+          sudo bash "$GITHUB_WORKSPACE"/make.sh ${{ github.event.inputs.URL }} ${{ github.event.inputs.VENDOR_URL }} $GITHUB_ENV $GITHUB_WORKSPACE
+      - name: 8.上传到Oracle S3
+        run: |
+          mkdir -p ~/.config/rclone/
+          echo ${{ secrets.confbase64 }} > base64.txt
+          base64 --decode base64.txt > ~/.config/rclone/rclone.conf
+          rclone mkdir kr:/public-bucket/HyperOS 
+          rclone copy -P ./zip/* kr:/public-bucket/HyperOS 
