@@ -25,7 +25,7 @@ jobs:
           remove-android: 'true'
           remove-haskell: 'true'
       - name: 检出仓库文件
-        uses: YuKongA/Action_Build_Houji_ROM@main
+        uses: pzcn/Action_Build_Houji_ROM@main
       - name: 准备所需环境
         run: |
           sudo timedatectl set-timezone Asia/Shanghai
