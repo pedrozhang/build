@@ -10,7 +10,6 @@ on:
         description: "底包下载地址"
         required: true
         default: 'https://cdn-ota.azureedge.net/OS1.0.32.0.UNCCNXM/miui_HOUJI_OS1.0.32.0.UNCCNXM_4fd0e15877_14.0.zip'
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,7 +24,10 @@ jobs:
           remove-android: 'true'
           remove-haskell: 'true'
       - name: 检出仓库文件
-        uses: pzcn/Action_Build_Houji_ROM@main
+        uses: actions/checkout@v2
+        with:
+          repository: 'pzcn/Action_Build_Houji_ROM@main'
+          token: ${{ secrets.GITHUB_TOKEN }} 
       - name: 准备所需环境
         run: |
           sudo timedatectl set-timezone Asia/Shanghai
