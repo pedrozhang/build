@@ -26,7 +26,7 @@ jobs:
       - name: 检出仓库文件
         uses: actions/checkout@v2
         with:
-          repository: 'pzcn/Action_Build_Houji_ROM@main'
+          repository: 'pzcn/Action_Build_Houji_ROM'
           token: ${{ secrets.GITHUB_TOKEN }} 
       - name: 准备所需环境
         run: |
