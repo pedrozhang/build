@@ -136,12 +136,7 @@ jobs:
           mkdir -p ~/.config/rclone/
           echo ${{ secrets.confbase64 }} > base64.txt
           base64 --decode base64.txt > ~/.config/rclone/rclone.conf
-          if [[ $NFC == true ]]; then
           rclone mkdir kr:/public-bucket/HyperOS 
           rclone copy -P ./zip/* kr:/public-bucket/HyperOS 
-          else
-          rclone mkdir jp:/jp/HyperOS 
-          rclone copy -P ./zip/* jp:/jp/HyperOS 
-          fi
         env:
           NFC: ${{ inputs.NFC }}
