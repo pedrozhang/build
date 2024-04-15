@@ -116,11 +116,11 @@ jobs:
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
           if [[ $device == "umi" || $device == "cas" || $device == "cmi" ]]; then
           if [[ $NFC == true ]]; then
-          sed -i 's/NFC_version=1/NFC_version=2/' build_local.sh
+          sed -i 's/NFC_version=1/NFC_version=2/' build_local_HyperOS.sh
           fi
           fi
-          sed -i 's/status_bar_lyric=0/status_bar_lyric=1/' build_local.sh
-          bash build_local.sh $URL $device $custom_version premium true false erofs
+          sed -i 's/status_bar_lyric=0/status_bar_lyric=1/' build_local_HyperOS.sh
+          bash build_local_HyperOS.sh $URL $device $custom_version premium true false erofs
           source "$GITHUB_WORKSPACE"/PackageInfo.txt
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_ENV"
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
