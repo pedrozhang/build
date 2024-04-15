@@ -20,6 +20,11 @@ on:
         required: true
         type: boolean
         default: true
+      NFC:
+        description: "EROFS&VK"
+        required: true
+        type: boolean
+        default: true
 jobs:
   build_matrix:
     name: 设置构建阵列
@@ -120,7 +125,11 @@ jobs:
           fi
           fi
           sed -i 's/status_bar_lyric=0/status_bar_lyric=1/' build_local_HyperOS.sh
+          if [[ $EROFS == true ]]; then
           bash build_local_HyperOS.sh $URL $device $custom_version premium true false erofs
+          elif [[ $EROFS == false ]]
+          bash build_local_HyperOS.sh $URL $device $custom_version premium false false ext4
+          fi
           source "$GITHUB_WORKSPACE"/PackageInfo.txt
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_ENV"
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
@@ -131,6 +140,7 @@ jobs:
           URL: ${{ inputs.URL }}
           custom_version: ${{ inputs.custom_version }}
           NFC: ${{ inputs.NFC }}
+          EROFS: ${{ inputs.EROFS }}
       - name: 8.上传到Oracle S3
         run: |
           mkdir -p ~/.config/rclone/
