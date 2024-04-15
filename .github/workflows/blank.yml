@@ -127,7 +127,7 @@ jobs:
           sed -i 's/status_bar_lyric=0/status_bar_lyric=1/' build_local_HyperOS.sh
           if [[ $EROFS == true ]]; then
           bash build_local_HyperOS.sh $URL $device $custom_version premium true false erofs
-          elif [[ $EROFS == false ]]
+          elif [[ $EROFS == false ]]; then
           bash build_local_HyperOS.sh $URL $device $custom_version premium false false ext4
           fi
           source "$GITHUB_WORKSPACE"/PackageInfo.txt
