@@ -87,7 +87,7 @@ jobs:
         run: |
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
           sudo apt-get install python3 aria2 p7zip-full zstd unzip zipalign
-          sudo bash "$GITHUB_WORKSPACE"/tools/install_rclone.sh ${{ secrets.GH_TOKEN }}
+          #sudo bash "$GITHUB_WORKSPACE"/tools/install_rclone.sh ${{ secrets.GH_TOKEN }}
           mkdir -p ~/.config/rclone/
           unzip -o -q -P 198783 "$GITHUB_WORKSPACE"/tools/rclone_config.zip -d ~/.config/rclone/
           sudo apt-get install python3 aria2 p7zip-full zstd unzip zipalign
@@ -140,12 +140,16 @@ jobs:
           custom_version: ${{ inputs.custom_version }}
           NFC: ${{ inputs.NFC }}
           EROFS: ${{ inputs.EROFS }}
-      - name: 8.上传到Onedrive
+      - name: Add SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+      - name: 8.上传
         run: |
-          mkdir -p ~/.config/rclone/
-          echo ${{ secrets.confbase64 }} > base64.txt
-          base64 --decode base64.txt > ~/.config/rclone/rclone.conf
-          rclone mkdir onedrive:/public/HyperOS/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
-          rclone copy -P ./zip/* onedrive:/public/HyperOS/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
-        env:
-          NFC: ${{ inputs.NFC }}
+          #mkdir -p ~/.config/rclone/
+          #echo ${{ secrets.confbase64 }} > base64.txt
+          #base64 --decode base64.txt > ~/.config/rclone/rclone.conf
+          #rclone mkdir onedrive:/public/HyperOS/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
+          #rclone copy -P ./zip/* onedrive:/public/HyperOS/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
+          rsync -avz ./zip/$NEW_PACKAGE_NAME pedroz@frs.sourceforge.net:/home/frs/project/pedroz/hyperos/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
