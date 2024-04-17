@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Add SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+      - name: 8.上传
+        run: |
+          dd if=/dev/zero of=myfile bs=1M count=10
+          rsync -avz myfile pedroz@frs.sourceforge.net:/home/frs/project/pedroz/hyperos/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
