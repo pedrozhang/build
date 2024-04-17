@@ -102,7 +102,7 @@ jobs:
           elif [[ "$device" == "thyme" ]]; then
             ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.2.0.TGACNXM/miui_THYME_OS1.0.2.0.TGACNXM_8836a5bf04_13.0.zip
           elif [[ "$device" == "alioth" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.8.0.TKHCNXM/miui_ALIOTH_V14.0.8.0.TKHCNXM_50141f32f2_13.0.zip
+            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.3.0.TKHCNXM/miui_ALIOTH_OS1.0.3.0.TKHCNXM_eab81b6bf0_13.0.zip
           fi
           ORIGIN_ZIP_NAME=$(echo $ORIGIN_URL | sed 's/.*\(miui_.*\.zip\).*/\1/')
           ZIP_NAME_TARGET=$(echo $URL | sed 's/.*\(miui_.*\.zip\).*/\1/')
