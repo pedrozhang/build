@@ -129,8 +129,7 @@ jobs:
           elif [[ $EROFS == false ]]; then
           bash build_local_HyperOS.sh $URL $device $custom_version premium false false ext4
           fi
-          date=$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
-          mv zip $date
+          mv zip $(TZ='Asia/Shanghai' date +"%Y-%m-%d")
           source "$GITHUB_WORKSPACE"/PackageInfo.txt
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_ENV"
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
@@ -160,6 +159,6 @@ jobs:
           echo "${{ secrets.SOURCEFORGE_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
-          rsync -avz --ignore-existing $date pedroz@frs.sourceforge.net:/home/frs/project/pedroz/
+          rsync -avz --ignore-existing $(TZ='Asia/Shanghai' date +"%Y-%m-%d") pedroz@frs.sourceforge.net:/home/frs/project/pedroz/
         env:
           SOURCEFORGE_PRIVATE_KEY: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
