@@ -15,11 +15,12 @@ jobs:
       - uses: actions/checkout@v3
       - name: Upload file to SourceForge
         run: |
+          dd if=/dev/zero of=myfile bs=1M count=10
           mkdir -p ~/.ssh/
           echo "${{ secrets.SOURCEFORGE_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
-          rsync -r myfile pedroz@frs.sourceforge.net:/home/frs/project/pedroz/hyperos/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
+          rsync -r myfile pedroz@frs.sourceforge.net:/home/frs/project/pedroz/
         env:
           SOURCEFORGE_PRIVATE_KEY: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
 
