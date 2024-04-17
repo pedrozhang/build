@@ -13,17 +13,14 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-      - name: Add SSH key
-        uses: shimataro/ssh-key-action@v2.7.0
-        with:
-          key: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+      - name: Upload file to SourceForge
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SOURCEFORGE_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
+          rsync -r myfile pedroz@frs.sourceforge.net:/home/frs/project/pedroz/hyperos/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
         env:
           SOURCEFORGE_PRIVATE_KEY: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
-      - name: 8.上传
-        run: |
-          dd if=/dev/zero of=myfile bs=1M count=10
-          rsync -r myfile pedroz@frs.sourceforge.net:/home/frs/project/pedroz/hyperos/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
-
 
 
