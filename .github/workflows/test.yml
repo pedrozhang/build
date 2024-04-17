@@ -18,8 +18,8 @@ jobs:
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
-          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+          known_hosts: unnecessary
       - name: 8.上传
         run: |
           dd if=/dev/zero of=myfile bs=1M count=10
-          rsync -avz myfile pedroz@frs.sourceforge.net:/home/frs/project/pedroz/hyperos/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
+          rsync -r -e ssh myfile pedroz@frs.sourceforge.net:/home/frs/project/pedroz/hyperos/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
