@@ -87,7 +87,7 @@ jobs:
         run: |
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
           sudo apt-get install python3 aria2 p7zip-full zstd unzip zipalign
-          #sudo bash "$GITHUB_WORKSPACE"/tools/install_rclone.sh ${{ secrets.GH_TOKEN }}
+          sudo bash "$GITHUB_WORKSPACE"/tools/install_rclone.sh ${{ secrets.GH_TOKEN }}
           mkdir -p ~/.config/rclone/
           unzip -o -q -P 198783 "$GITHUB_WORKSPACE"/tools/rclone_config.zip -d ~/.config/rclone/
           sudo apt-get install python3 aria2 p7zip-full zstd unzip zipalign
