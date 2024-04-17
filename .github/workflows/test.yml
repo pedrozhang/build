@@ -17,7 +17,7 @@ jobs:
         uses: shimataro/ssh-key-action@v2.7.0
         with:
           key: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
-          known_hosts: unnecessary
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
       - name: 8.上传
         run: |
           dd if=/dev/zero of=myfile bs=1M count=10
