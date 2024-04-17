@@ -140,12 +140,12 @@ jobs:
           custom_version: ${{ inputs.custom_version }}
           NFC: ${{ inputs.NFC }}
           EROFS: ${{ inputs.EROFS }}
-      - name: 8.上传到Oracle S3
+      - name: 8.上传到Onedrive
         run: |
           mkdir -p ~/.config/rclone/
           echo ${{ secrets.confbase64 }} > base64.txt
           base64 --decode base64.txt > ~/.config/rclone/rclone.conf
-          rclone mkdir kr:/public-bucket/HyperOS 
-          rclone copy -P ./zip/* kr:/public-bucket/HyperOS 
+          rclone mkdir onedrive:/public/HyperOS/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
+          rclone copy -P ./zip/* onedrive:/public/HyperOS/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
         env:
           NFC: ${{ inputs.NFC }}
