@@ -129,12 +129,17 @@ jobs:
           elif [[ $EROFS == false ]]; then
           bash build_local_HyperOS.sh $URL $device $custom_version premium false false ext4
           fi
-          mv zip $(TZ='Asia/Shanghai' date +"%Y-%m-%d")
           source "$GITHUB_WORKSPACE"/PackageInfo.txt
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_ENV"
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
           echo "MD5=$MD5" >> "$GITHUB_ENV"
           echo "MD5=$MD5" >> "$GITHUB_OUTPUT"
+          mv zip/"$NEW_PACKAGE_NAME" zip/"${NEW_PACKAGE_NAME%_EROFS_2in1*}.zip"
+          if [[ $NFC == true ]]; then
+          mv zip $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0
+          else
+          mv zip $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0
+          fi
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
           URL: ${{ inputs.URL }}
