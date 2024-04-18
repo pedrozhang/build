@@ -136,7 +136,13 @@ jobs:
           echo "MD5=$MD5" >> "$GITHUB_ENV"
           echo "MD5=$MD5" >> "$GITHUB_OUTPUT"
           mv zip/"$NEW_PACKAGE_NAME" zip/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
-          mv zip $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NoDolby
+          if [[ $NFC == true ]]; then
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/NoDolby
+          mv zip $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/NoDolby
+          else
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/NoDolby
+          mv zip $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/NoDolby
+          fi
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
           URL: ${{ inputs.URL }}
