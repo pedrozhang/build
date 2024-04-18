@@ -137,10 +137,10 @@ jobs:
           mv zip/"$NEW_PACKAGE_NAME" zip/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
           if [[ $NFC == true ]]; then
           mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0
-          mv zip $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0
+          mv zip/* $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0
           else
           mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0
-          mv zip $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0
+          mv zip/* $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0
           fi
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
