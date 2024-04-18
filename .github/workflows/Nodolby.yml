@@ -1,4 +1,4 @@
-name: Xiaomi HyperOS no dolby
+name: Xiaomi HyperOS - Nodolby
 on:
   workflow_dispatch:
     inputs:
@@ -17,6 +17,11 @@ on:
         type: string
       NFC:
         description: "新版NFC"
+        required: true
+        type: boolean
+        default: true
+      EROFS:
+        description: "EROFS&VK"
         required: true
         type: boolean
         default: true
@@ -87,17 +92,17 @@ jobs:
           unzip -o -q -P 198783 "$GITHUB_WORKSPACE"/tools/rclone_config.zip -d ~/.config/rclone/
           sudo apt-get install python3 aria2 p7zip-full zstd unzip zipalign
           if [[ "$device" == "umi" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.4.0.TJBCNXM/miui_UMI_V14.0.4.0.TJBCNXM_23fc5ef4ee_13.0.zip
+            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.3.0.TJBCNXM/miui_UMI_OS1.0.3.0.TJBCNXM_ea86eb9a62_13.0.zip
           elif [[ "$device" == "cmi" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.4.0.TJACNXM/miui_CMI_V14.0.4.0.TJACNXM_dd66e9703f_13.0.zip
+            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.3.0.TJACNXM/miui_CMI_OS1.0.3.0.TJACNXM_53c5dcd552_13.0.zip
           elif [[ "$device" == "cas" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.2.0.TJJCNXM/miui_CAS_V14.0.2.0.TJJCNXM_8064d8e1fb_13.0.zip
+            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.2.0.TJJCNXM/miui_CAS_OS1.0.2.0.TJJCNXM_7bda5178f0_13.0.zip
           elif [[ "$device" == "apollo" ]]; then
             ORIGIN_URL=https://hugeota.d.miui.com/V14.0.5.0.SJDCNXM/miui_APOLLO_V14.0.5.0.SJDCNXM_e727f2446b_12.0.zip
           elif [[ "$device" == "thyme" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.6.0.TGACNXM/miui_THYME_V14.0.6.0.TGACNXM_a3c1d41b17_13.0.zip
+            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.2.0.TGACNXM/miui_THYME_OS1.0.2.0.TGACNXM_8836a5bf04_13.0.zip
           elif [[ "$device" == "alioth" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.8.0.TKHCNXM/miui_ALIOTH_V14.0.8.0.TKHCNXM_50141f32f2_13.0.zip
+            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.3.0.TKHCNXM/miui_ALIOTH_OS1.0.3.0.TKHCNXM_eab81b6bf0_13.0.zip
           fi
           ORIGIN_ZIP_NAME=$(echo $ORIGIN_URL | sed 's/.*\(miui_.*\.zip\).*/\1/')
           ZIP_NAME_TARGET=$(echo $URL | sed 's/.*\(miui_.*\.zip\).*/\1/')
@@ -116,33 +121,46 @@ jobs:
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
           if [[ $device == "umi" || $device == "cas" || $device == "cmi" ]]; then
           if [[ $NFC == true ]]; then
-          sed -i 's/NFC_version=1/NFC_version=2/' build_local.sh
+          sed -i 's/NFC_version=1/NFC_version=2/' build_local_HyperOS.sh
           fi
           fi
-          sed -i 's/status_bar_lyric=0/status_bar_lyric=1/' build_local.sh
           sed -i 's/Dolby()/NoDolby()/' build_local.sh
-          bash build_local.sh $URL $device $custom_version premium true false erofs
+          if [[ $EROFS == true ]]; then
+          bash build_local_HyperOS.sh $URL $device $custom_version premium true false erofs
+          elif [[ $EROFS == false ]]; then
+          bash build_local_HyperOS.sh $URL $device $custom_version premium false false ext4
+          fi
           source "$GITHUB_WORKSPACE"/PackageInfo.txt
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_ENV"
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
           echo "MD5=$MD5" >> "$GITHUB_ENV"
           echo "MD5=$MD5" >> "$GITHUB_OUTPUT"
+          mv zip/"$NEW_PACKAGE_NAME" zip/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
+          mv zip $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NoDolby
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
           URL: ${{ inputs.URL }}
           custom_version: ${{ inputs.custom_version }}
           NFC: ${{ inputs.NFC }}
-      - name: 8.上传到Oracle S3
+          EROFS: ${{ inputs.EROFS }}
+      - name: Add SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+      - name: 8.上传
         run: |
-          mkdir -p ~/.config/rclone/
-          echo ${{ secrets.confbase64 }} > base64.txt
-          base64 --decode base64.txt > ~/.config/rclone/rclone.conf
-          if [[ $NFC == true ]]; then
-          rclone mkdir kr:/public-bucket/HyperOS 
-          rclone copy -P ./zip/* kr:/public-bucket/HyperOS 
-          else
-          rclone mkdir jp:/jp/HyperOS 
-          rclone copy -P ./zip/* jp:/jp/HyperOS 
-          fi
+          #mkdir -p ~/.config/rclone/
+          #echo ${{ secrets.confbase64 }} > base64.txt
+          #base64 --decode base64.txt > ~/.config/rclone/rclone.conf
+          #rclone mkdir onedrive:/public/HyperOS/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
+      - name: Upload file to SourceForge
+        run: |
+          dd if=/dev/zero of=myfile bs=1M count=10
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SOURCEFORGE_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
+          rsync -avz --ignore-existing $(TZ='Asia/Shanghai' date +"%Y-%m-%d") pedroz@frs.sourceforge.net:/home/frs/project/pedroz/
         env:
-          NFC: ${{ inputs.NFC }}
+          SOURCEFORGE_PRIVATE_KEY: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
