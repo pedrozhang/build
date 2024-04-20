@@ -150,10 +150,11 @@ jobs:
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
       - name: 8.上传
         run: |
-          #mkdir -p ~/.config/rclone/
-          #echo ${{ secrets.confbase64 }} > base64.txt
-          #base64 --decode base64.txt > ~/.config/rclone/rclone.conf
-          #rclone mkdir onedrive:/public/HyperOS/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
+          mkdir -p ~/.config/rclone/
+          echo ${{ secrets.confbase64 }} > base64.txt
+          base64 --decode base64.txt > ~/.config/rclone/rclone.conf
+          rclone mkdir kr:/public-bucket/HyperOS
+          rclone copy -P ./zip/* kr:/public-bucket/HyperOS
       - name: Upload file to SourceForge
         run: |
           dd if=/dev/zero of=myfile bs=1M count=10
@@ -161,6 +162,6 @@ jobs:
           echo "${{ secrets.SOURCEFORGE_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
-          rsync -avz --ignore-existing $(TZ='Asia/Shanghai' date +"%Y-%m-%d") pedroz@frs.sourceforge.net:/home/frs/project/pedroz/
+          #rsync -avz --ignore-existing $(TZ='Asia/Shanghai' date +"%Y-%m-%d") pedroz@frs.sourceforge.net:/home/frs/project/pedroz/
         env:
           SOURCEFORGE_PRIVATE_KEY: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
