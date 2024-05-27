@@ -1,4 +1,4 @@
-name: Xiaomi HyperOS - Nodolby
+name: Xiaomi HyperOS - kona
 on:
   workflow_dispatch:
     inputs:
@@ -115,6 +115,14 @@ jobs:
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
           URL: ${{ inputs.URL }}
+      - name: 下载 TWRP
+        uses: robinraju/release-downloader@v1.9
+        with:
+            repository: zjw2017/TWRP_Backup
+            tag: "twrp"
+            fileName: "*${{ env.device }}*"
+            out-file-path: "${{ env.device }}_files"
+            token: ${{ secrets.GH_TOKEN }}
       - name: 自动构建
         id: auto-build
         run: |
@@ -126,9 +134,9 @@ jobs:
           fi
           sed -i 's/Dolby=true/Dolby=false/' build_local_HyperOS.sh
           if [[ $EROFS == true ]]; then
-          bash build_local_HyperOS.sh $URL $device $custom_version premium true false erofs
+          sudo bash build_local_HyperOS.sh $URL $device $custom_version premium true false erofs
           elif [[ $EROFS == false ]]; then
-          bash build_local_HyperOS.sh $URL $device $custom_version premium false false ext4
+          sudo bash build_local_HyperOS.sh $URL $device $custom_version premium false false ext4
           fi
           source "$GITHUB_WORKSPACE"/PackageInfo.txt
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_ENV"
@@ -136,11 +144,11 @@ jobs:
           echo "MD5=$MD5" >> "$GITHUB_ENV"
           echo "MD5=$MD5" >> "$GITHUB_OUTPUT"
           if [ "$NFC_version" -eq 1 ]; then
-          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/Nodolby
-          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/Nodolby/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/
+          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
           elif [ "$NFC_version" -eq 2 ]; then 
-          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/Nodolby
-          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/Nodolby/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/
+          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
           fi
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
