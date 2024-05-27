@@ -134,9 +134,9 @@ jobs:
           fi
           sed -i 's/Dolby=true/Dolby=false/' build_local_HyperOS.sh
           if [[ $EROFS == true ]]; then
-          sudo bash build_local_HyperOS.sh $URL $device $custom_version premium true false erofs
+          sudo bash build_local_HyperOS.sh $URL $device $custom_version true false erofs
           elif [[ $EROFS == false ]]; then
-          sudo bash build_local_HyperOS.sh $URL $device $custom_version premium false false ext4
+          sudo bash build_local_HyperOS.sh $URL $device $custom_version false false ext4
           fi
           source "$GITHUB_WORKSPACE"/PackageInfo.txt
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_ENV"
