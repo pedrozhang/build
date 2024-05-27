@@ -127,6 +127,7 @@ jobs:
         id: auto-build
         run: |
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
+          touch "$GITHUB_WORKSPACE"/PackageInfo.txt
           if [[ $device == "umi" || $device == "cas" || $device == "cmi" || $device == "thyme" || $device == "alioth" ]]; then
           if [[ $NFC == false ]]; then
           sed -i 's/NFC_version=2/NFC_version=1/' build_local_HyperOS.sh
