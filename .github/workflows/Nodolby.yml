@@ -83,7 +83,6 @@ jobs:
         with:
           repository: Weverses/ActionBuildCasSystemT
           token: ${{ secrets.GH_TOKEN }}
-          ref: NFC
       - name: 下载系统包
         run: |
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
