@@ -147,8 +147,8 @@ jobs:
           mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/
           mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
           elif [ "$NFC_version" -eq 2 ]; then 
-          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/
-          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/
+          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
           fi
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
