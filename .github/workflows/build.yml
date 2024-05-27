@@ -135,7 +135,6 @@ jobs:
           fi
           if [[ $EROFS == true ]]; then
           sudo bash build_local_HyperOS.sh $URL $device $custom_version true false erofs
-          $URL $device $custom_version $VK $data $pack_type
           elif [[ $EROFS == false ]]; then
           sudo bash build_local_HyperOS.sh $URL $device $custom_version false false ext4
           fi
