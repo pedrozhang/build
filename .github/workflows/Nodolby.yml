@@ -1,4 +1,4 @@
-name: Xiaomi HyperOS - Nodolby
+name: Xiaomi HyperOS - kona
 on:
   workflow_dispatch:
     inputs:
@@ -83,6 +83,7 @@ jobs:
         with:
           repository: Weverses/ActionBuildCasSystemT
           token: ${{ secrets.GH_TOKEN }}
+          ref: NFC
       - name: 下载系统包
         run: |
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
@@ -119,9 +120,9 @@ jobs:
         id: auto-build
         run: |
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
-          if [[ $device == "umi" || $device == "cas" || $device == "cmi" ]]; then
-          if [[ $NFC == true ]]; then
-          sed -i 's/NFC_version=1/NFC_version=2/' build_local_HyperOS.sh
+          if [[ $device == "umi" || $device == "cas" || $device == "cmi" || $device == "thyme" || $device == "alioth" ]]; then
+          if [[ $NFC == false ]]; then
+          sed -i 's/NFC_version=2/NFC_version=1/' build_local_HyperOS.sh
           fi
           fi
           sed -i 's/Dolby=true/Dolby=false/' build_local_HyperOS.sh
@@ -135,13 +136,12 @@ jobs:
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
           echo "MD5=$MD5" >> "$GITHUB_ENV"
           echo "MD5=$MD5" >> "$GITHUB_OUTPUT"
-          mv zip/"$NEW_PACKAGE_NAME" zip/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
-          if [[ $NFC == true ]]; then
-          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/NoDolby
-          mv zip/* $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/NoDolby
-          else
-          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/NoDolby
-          mv zip/* $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/NoDolby
+          if [ "$NFC_version" -eq 1 ]; then
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/Nodolby
+          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/Nodolby/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
+          elif [ "$NFC_version" -eq 2 ]; then 
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/Nodolby
+          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/Nodolby/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
           fi
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
@@ -159,7 +159,8 @@ jobs:
           #mkdir -p ~/.config/rclone/
           #echo ${{ secrets.confbase64 }} > base64.txt
           #base64 --decode base64.txt > ~/.config/rclone/rclone.conf
-          #rclone mkdir onedrive:/public/HyperOS/$(TZ='Asia/Shanghai' date +"%Y-%m-%d")
+          #rclone mkdir kr:/public-bucket/HyperOS
+          #rclone copy -P $(TZ='Asia/Shanghai' date +"%Y-%m-%d") kr:/public-bucket/HyperOS
       - name: Upload file to SourceForge
         run: |
           dd if=/dev/zero of=myfile bs=1M count=10
