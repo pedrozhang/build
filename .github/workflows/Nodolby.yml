@@ -16,7 +16,7 @@ on:
         required: true
         type: string
       NFC:
-        description: "新版NFC"olby
+        description: "新版NFC"
         required: true
         type: boolean
         default: true
