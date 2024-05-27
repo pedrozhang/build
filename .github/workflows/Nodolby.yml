@@ -1,4 +1,4 @@
-name: Xiaomi HyperOS - kona
+name: Xiaomi HyperOS - nodolby
 on:
   workflow_dispatch:
     inputs:
