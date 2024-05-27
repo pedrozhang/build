@@ -143,10 +143,10 @@ jobs:
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
           echo "MD5=$MD5" >> "$GITHUB_ENV"
           echo "MD5=$MD5" >> "$GITHUB_OUTPUT"
-          if [ "$NFC_version" -eq 1 ]; then
+          if [ "$NFC" = "false" ]; then
           mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/
           mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
-          elif [ "$NFC_version" -eq 2 ]; then 
+          elif [ "$NFC" = "true" ]; then 
           mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/
           mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
           fi
