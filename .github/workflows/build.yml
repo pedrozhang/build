@@ -121,8 +121,8 @@ jobs:
         run: |
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
           if [[ $device == "umi" || $device == "cas" || $device == "cmi" || $device == "thyme" || $device == "alioth" ]]; then
-          if [[ $NFC == true ]]; then
-          sed -i 's/NFC_version=1/NFC_version=2/' build_local_HyperOS.sh
+          if [[ $NFC == false ]]; then
+          sed -i 's/NFC_version=2/NFC_version=1/' build_local_HyperOS.sh
           fi
           fi
           if [[ $EROFS == true ]]; then
@@ -135,8 +135,13 @@ jobs:
           echo "NEW_PACKAGE_NAME=$NEW_PACKAGE_NAME" >> "$GITHUB_OUTPUT"
           echo "MD5=$MD5" >> "$GITHUB_ENV"
           echo "MD5=$MD5" >> "$GITHUB_OUTPUT"
-          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/test/
-          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/test/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
+          if [ "$NFC_version" -eq 1 ]; then
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/
+          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
+          elif [ "$NFC_version" -eq 2 ]; then 
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/
+          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
+          fi
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
           URL: ${{ inputs.URL }}
@@ -150,11 +155,11 @@ jobs:
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
       - name: 8.上传
         run: |
-          mkdir -p ~/.config/rclone/
-          echo ${{ secrets.confbase64 }} > base64.txt
-          base64 --decode base64.txt > ~/.config/rclone/rclone.conf
-          rclone mkdir kr:/public-bucket/HyperOS
-          rclone copy -P $(TZ='Asia/Shanghai' date +"%Y-%m-%d") kr:/public-bucket/HyperOS
+          #mkdir -p ~/.config/rclone/
+          #echo ${{ secrets.confbase64 }} > base64.txt
+          #base64 --decode base64.txt > ~/.config/rclone/rclone.conf
+          #rclone mkdir kr:/public-bucket/HyperOS
+          #rclone copy -P $(TZ='Asia/Shanghai' date +"%Y-%m-%d") kr:/public-bucket/HyperOS
       - name: Upload file to SourceForge
         run: |
           dd if=/dev/zero of=myfile bs=1M count=10
@@ -162,6 +167,6 @@ jobs:
           echo "${{ secrets.SOURCEFORGE_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
-          #rsync -avz --ignore-existing $(TZ='Asia/Shanghai' date +"%Y-%m-%d") pedroz@frs.sourceforge.net:/home/frs/project/pedroz/
+          rsync -avz --ignore-existing $(TZ='Asia/Shanghai' date +"%Y-%m-%d") pedroz@frs.sourceforge.net:/home/frs/project/pedroz/
         env:
           SOURCEFORGE_PRIVATE_KEY: ${{ secrets.SOURCEFORGE_PRIVATE_KEY }}
