@@ -1,4 +1,4 @@
-name: Xiaomi HyperOS - kona
+name: Xiaomi HyperOS - Nodolby
 on:
   workflow_dispatch:
     inputs:
@@ -16,7 +16,7 @@ on:
         required: true
         type: string
       NFC:
-        description: "新版NFC"
+        description: "新版NFC"olby
         required: true
         type: boolean
         default: true
