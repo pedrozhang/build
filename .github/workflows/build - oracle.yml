@@ -170,4 +170,5 @@ jobs:
           echo ${{ secrets.confbase64 }} > base64.txt
           base64 --decode base64.txt > ~/.config/rclone/rclone.conf
           rclone mkdir kr:/public-bucket/HyperOS 
-          rclone copy -P ./zip/* kr:/public-bucket/HyperOS 
+          rclone copy -P $(TZ='Asia/Shanghai' date +"%Y-%m-%d") kr:/public-bucket/HyperOS
+        
