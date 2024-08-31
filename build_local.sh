@@ -571,7 +571,6 @@ if [[ "$device" == "thyme" ]]; then
   sudo mv "$GITHUB_WORKSPACE"/common_files/MiSound_T.apk "$MiSound"/$MiSound2.apk
 fi
 # 杜比全景声 By MeetingFate
-if [[ "$device" == "cas" ]]; then
   info_functional 杜比全景声
   # 植入杜比移植必须文件 By Meetingfate
   sudo unzip -o -q "$GITHUB_WORKSPACE"/common_files/dolby.zip -d "$GITHUB_WORKSPACE"/"$device"/vendor
@@ -582,8 +581,8 @@ if [[ "$device" == "cas" ]]; then
   echo "/vendor/etc/init/vendor\.dolby\.hardware\.dms@2\.0-service\.rc u:object_r:vendor_configs_file:s0" | sudo tee -a "$GITHUB_WORKSPACE"/"$device"/config/vendor_file_contexts
   echo "/vendor/etc/vintf/manifest/manifest_vendor\.dolby\.hardware\.dms\.xml u:object_r:vendor_configs_file:s0" | sudo tee -a "$GITHUB_WORKSPACE"/"$device"/config/vendor_file_contexts
   # 杜比音效支持 By Meetingfate
-  sudo sed -i ''"$(sudo sed -n '/ro.vendor.audio.soundfx.type/=' "$vendor_build_prop")"'a ro.vendor.audio.dolby.surround.enable=true' "$vendor_build_prop"
-  sudo sed -i ''"$(sudo sed -n '/ro.vendor.audio.soundfx.type/=' "$vendor_build_prop")"'i   ro.vendor.dolby.dax.version=DAX3_3.6.0.12_r1\nro.vendor.audio.dolby.dax.support=true' "$vendor_build_prop"
+  #sudo sed -i ''"$(sudo sed -n '/ro.vendor.audio.soundfx.type/=' "$vendor_build_prop")"'a ro.vendor.audio.dolby.surround.enable=true' "$vendor_build_prop"
+  #sudo sed -i ''"$(sudo sed -n '/ro.vendor.audio.soundfx.type/=' "$vendor_build_prop")"'i   ro.vendor.dolby.dax.version=DAX3_3.6.0.12_r1\nro.vendor.audio.dolby.dax.support=true' "$vendor_build_prop"
   # 修复杜比开关的的音质音效 By Meetingfate
   MiSound=$(sudo find "$GITHUB_WORKSPACE"/images/product/ -type d -iname "*MiSound*")
   if [[ -n "$MiSound" ]]; then
@@ -592,7 +591,6 @@ if [[ "$device" == "cas" ]]; then
   fi
   MiSound2=${MiSound##*/}
   sudo mv "$GITHUB_WORKSPACE"/common_files/MiSound_Dolby.apk "$MiSound"/$MiSound2.apk
-fi
 # 完美图标 By PedroZ
 info_functional 完美图标
 cd ${GITHUB_WORKSPACE}

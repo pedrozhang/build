@@ -1,4 +1,4 @@
-name: Xiaomi HyperOS - nodolby
+name: Xiaomi HyperOS - kona
 on:
   workflow_dispatch:
     inputs:
@@ -83,6 +83,12 @@ jobs:
         with:
           repository: Weverses/ActionBuildCasSystemT
           token: ${{ secrets.GH_TOKEN }}
+
+      - name: Checkout local repository
+        uses: actions/checkout@v4.1.1
+        with:
+          path: local-repo
+
       - name: 下载系统包
         run: |
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
@@ -92,17 +98,17 @@ jobs:
           unzip -o -q -P 198783 "$GITHUB_WORKSPACE"/tools/rclone_config.zip -d ~/.config/rclone/
           sudo apt-get install python3 aria2 p7zip-full zstd unzip zipalign
           if [[ "$device" == "umi" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.3.0.TJBCNXM/miui_UMI_OS1.0.3.0.TJBCNXM_ea86eb9a62_13.0.zip
+          ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.5.0.TJBCNXM/miui_UMI_OS1.0.5.0.TJBCNXM_d01651ed86_13.0.zip
           elif [[ "$device" == "cmi" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.3.0.TJACNXM/miui_CMI_OS1.0.3.0.TJACNXM_53c5dcd552_13.0.zip
+          ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.5.0.TJACNXM/miui_CMI_OS1.0.5.0.TJACNXM_64cdfa3fe5_13.0.zip
           elif [[ "$device" == "cas" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.2.0.TJJCNXM/miui_CAS_OS1.0.2.0.TJJCNXM_7bda5178f0_13.0.zip
+          ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.4.0.TJJCNXM/miui_CAS_OS1.0.4.0.TJJCNXM_40f432b58e_13.0.zip
           elif [[ "$device" == "apollo" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/V14.0.5.0.SJDCNXM/miui_APOLLO_V14.0.5.0.SJDCNXM_e727f2446b_12.0.zip
+          ORIGIN_URL=https://hugeota.d.miui.com/V14.0.5.0.SJDCNXM/miui_APOLLO_V14.0.5.0.SJDCNXM_e727f2446b_12.0.zip
           elif [[ "$device" == "thyme" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.2.0.TGACNXM/miui_THYME_OS1.0.2.0.TGACNXM_8836a5bf04_13.0.zip
+          ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.4.0.TGACNXM/miui_THYME_OS1.0.4.0.TGACNXM_80dbab1cd4_13.0.zip
           elif [[ "$device" == "alioth" ]]; then
-            ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.3.0.TKHCNXM/miui_ALIOTH_OS1.0.3.0.TKHCNXM_eab81b6bf0_13.0.zip
+          ORIGIN_URL=https://hugeota.d.miui.com/OS1.0.6.0.TKHCNXM/miui_ALIOTH_OS1.0.6.0.TKHCNXM_101dfdb5be_13.0.zip
           fi
           ORIGIN_ZIP_NAME=$(echo $ORIGIN_URL | sed 's/.*\(miui_.*\.zip\).*/\1/')
           ZIP_NAME_TARGET=$(echo $URL | sed 's/.*\(miui_.*\.zip\).*/\1/')
@@ -126,13 +132,14 @@ jobs:
       - name: 自动构建
         id: auto-build
         run: |
+          cp -rf local-repo/build_local.sh build_local_HyperOS.sh
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
+          touch "$GITHUB_WORKSPACE"/PackageInfo.txt
           if [[ $device == "umi" || $device == "cas" || $device == "cmi" || $device == "thyme" || $device == "alioth" ]]; then
           if [[ $NFC == false ]]; then
           sed -i 's/NFC_version=2/NFC_version=1/' build_local_HyperOS.sh
           fi
           fi
-          sed -i 's/Dolby=true/Dolby=false/' build_local_HyperOS.sh
           if [[ $EROFS == true ]]; then
           sudo bash build_local_HyperOS.sh $URL $device $custom_version true false erofs
           elif [[ $EROFS == false ]]; then
@@ -144,11 +151,11 @@ jobs:
           echo "MD5=$MD5" >> "$GITHUB_ENV"
           echo "MD5=$MD5" >> "$GITHUB_OUTPUT"
           if [ "$NFC" = "false" ]; then
-          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/
-          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/dobly-service
+          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC1.0/dobly-service/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
           elif [ "$NFC" = "true" ]; then 
-          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/
-          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
+          mkdir -p $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/dobly-service
+          mv zip/"$NEW_PACKAGE_NAME" $(TZ='Asia/Shanghai' date +"%Y-%m-%d")/NFC2.0/dobly-service/"${NEW_PACKAGE_NAME%_2in1_EROFS*}.zip"
           fi
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
