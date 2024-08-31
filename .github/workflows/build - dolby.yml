@@ -1,4 +1,4 @@
-name: Xiaomi HyperOS - kona
+name: Xiaomi HyperOS - kona dobly-service
 on:
   workflow_dispatch:
     inputs:
