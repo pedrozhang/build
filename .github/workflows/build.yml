@@ -83,6 +83,12 @@ jobs:
         with:
           repository: Weverses/ActionBuildCasSystemT
           token: ${{ secrets.GH_TOKEN }}
+
+      - name: Checkout local repository
+        uses: actions/checkout@v4.1.1
+        with:
+          path: local-repo
+
       - name: 下载系统包
         run: |
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
@@ -126,6 +132,7 @@ jobs:
       - name: 自动构建
         id: auto-build
         run: |
+          cp -rf local-repo/build_local.sh build_local_HyperOS.sh
           device=$(echo "$MATRIX_CONTEXT" | jq -r '.list.device')
           touch "$GITHUB_WORKSPACE"/PackageInfo.txt
           if [[ $device == "umi" || $device == "cas" || $device == "cmi" || $device == "thyme" || $device == "alioth" ]]; then
