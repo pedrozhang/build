@@ -554,11 +554,6 @@ fi
 # 修复PS手柄按键映射
 info_functional 修复PS手柄按键映射
 sudo sed -i '/requires_kernel_config CONFIG_HID_PLAYSTATION/s/^/#/' "$GITHUB_WORKSPACE"/images/system/system/usr/keylayout/Vendor_054c_Product_0ce6.kl
-# 替换selinux By zjw2017
-if [[ "$device" == "umi" ]] || [[ "$device" == "cmi" ]] || [[ "$device" == "cas" ]] || [[ "$device" == "apollo" ]]; then
-  sudo rm -rf "$GITHUB_WORKSPACE"/"$device"/vendor/etc/selinux/*
-  sudo unzip -o -q "$GITHUB_WORKSPACE"/"$device"_files/selinux.zip -d "$GITHUB_WORKSPACE"/"$device"/vendor/etc
-fi
 # 音质音效修复 By zjw2017
 if [[ "$device" == "thyme" ]]; then
   info_necessary 音质音效修复
@@ -570,8 +565,11 @@ if [[ "$device" == "thyme" ]]; then
   MiSound2=${MiSound##*/}
   sudo mv "$GITHUB_WORKSPACE"/common_files/MiSound_T.apk "$MiSound"/$MiSound2.apk
 fi
+if [[ "$device" == "111" ]]; then
 # 杜比全景声 By MeetingFate
   info_functional 杜比全景声
+  sudo rm -rf "$GITHUB_WORKSPACE"/"$device"/vendor/etc/selinux/*
+  sudo unzip -o -q "$GITHUB_WORKSPACE"/"$device"_files/selinux.zip -d "$GITHUB_WORKSPACE"/"$device"/vendor/etc
   # 植入杜比移植必须文件 By Meetingfate
   sudo unzip -o -q "$GITHUB_WORKSPACE"/common_files/dolby.zip -d "$GITHUB_WORKSPACE"/"$device"/vendor
   # 修改用户组，使杜比服务可被正常拉起 By Meetingfate
@@ -591,6 +589,7 @@ fi
   fi
   MiSound2=${MiSound##*/}
   sudo mv "$GITHUB_WORKSPACE"/common_files/MiSound_Dolby.apk "$MiSound"/$MiSound2.apk
+fi
 # 完美图标 By PedroZ
 info_functional 完美图标
 cd ${GITHUB_WORKSPACE}
